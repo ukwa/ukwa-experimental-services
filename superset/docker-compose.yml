@@ -1,0 +1,44 @@
+version: '3'
+services:
+  redis:
+    image: redis
+    restart: always
+    volumes:
+      - redis:/data
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: superset
+      POSTGRES_PASSWORD: superset
+      POSTGRES_USER: superset
+    volumes:
+      - postgres:/var/lib/postgresql/data
+  superset:
+    image: ukwa/superset
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      MAPBOX_API_KEY: ${MAPBOX_API_KEY}
+    ports:
+      - "8088:8080"
+    volumes:
+      - ./config:/app/pythonpath
+  worker:
+    image: ukwa/superset
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      MAPBOX_API_KEY: ${MAPBOX_API_KEY}
+    volumes:
+      - ./config:/app/pythonpath
+    command: superset worker
+volumes:
+  postgres:
+  redis:
+
+

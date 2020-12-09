@@ -1,0 +1,41 @@
+version: "3.5"
+
+services:
+  # Experimenting with NiFi
+  # https://www.nifi.rocks/apache-nifi-docker-compose-cluster/
+  nifi:
+    image: apache/nifi:1.11.3
+    ports:
+      - "9191:8080"
+      - "9192:9092"
+    volumes:
+      - ./nifi-conf:/opt/nifi/nifi-current/conf
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    # This puts the nifi user in the hosts Docker group, so we can run tasks via Docker as mounted in the two lines above.
+    user: "nifi:992"
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
+      - NIFI_WEB_HTTP_HOST=0.0.0.0
+#      - NIFI_CLUSTER_IS_NODE=true
+#      - NIFI_CLUSTER_NODE_PROTOCOL_PORT=8082
+#      - NIFI_ZK_CONNECT_STRING=zookeeper:2181
+#      - NIFI_ELECTION_MAX_WAIT=1 min
+#
+#  zookeeper:
+#    hostname: zookeeper
+#    image: 'bitnami/zookeeper:latest'
+#    environment:
+#      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  # Based on https://dzone.com/articles/quick-tip-using-git-with-nifi-registry-in-docker
+  registry:
+    image: apache/nifi-registry:0.5.0
+    ports:
+      - "19191:18080"
+    volumes:
+      - ./flow-storage:/flow_storage
+      - ./providers.xml:/opt/nifi-registry/nifi-registry-current/conf/providers.xml
+    environment:
+      - NIFI_REGISTRY_WEB_HTTP_HOST=0.0.0.0
+
